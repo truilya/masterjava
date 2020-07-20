@@ -1,8 +1,9 @@
 package ru.javaops.masterjava.matrix;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
 
 /**
  * gkislin
@@ -11,10 +12,63 @@ import java.util.concurrent.ExecutorService;
 public class MatrixUtil {
 
     // TODO implement parallel multiplication matrixA*matrixB
-    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor, final int threadNumber) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
+        final int[][] matrixBT = new int[matrixSize][matrixSize];
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                matrixBT[i][j] = matrixB[j][i];
+            }
+        }
+        class PartMatrixMultiplier implements Callable<Integer> {
+            private int lowBound;
+            private int upperBound;
 
+            public PartMatrixMultiplier(int lowBound, int upperBound) {
+                this.lowBound = lowBound;
+                this.upperBound = upperBound;
+            }
+
+            @Override
+            public Integer call() throws Exception {
+                for (int i = lowBound; i < upperBound; i++) {
+
+                    for (int j = 0; j < matrixSize; j++) {
+                        int sum = 0;
+                        int[] row = matrixA[i];
+                        int[] column = matrixBT[j];
+                        for (int k = 0; k < matrixSize; k++) {
+                            sum += row[k] * column[k];
+                        }
+                        matrixC[i][j] = sum;
+                    }
+
+                }
+                return 1;
+            }
+        }
+        final int delta = matrixSize / threadNumber;
+        List<PartMatrixMultiplier> list = new ArrayList<>();
+        for (int i = 0; i < threadNumber; i++) {
+            int lowBound = i * delta;
+            int upperBound;
+            if (i == (threadNumber - 1)) {
+                upperBound = matrixSize;
+            } else {
+                upperBound = (i + 1) * delta;
+            }
+            list.add(new PartMatrixMultiplier(lowBound, upperBound));
+        }
+        CompletionService completionService = new ExecutorCompletionService(executor);
+        List<Future> futures = new ArrayList<>();
+        for (PartMatrixMultiplier p : list) {
+            futures.add(completionService.submit(p));
+        }
+        while (!futures.isEmpty()) {
+            Future future = completionService.poll();
+            futures.remove(future);
+        }
         return matrixC;
     }
 
@@ -22,18 +76,35 @@ public class MatrixUtil {
     public static int[][] singleThreadMultiply(int[][] matrixA, int[][] matrixB) {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
-        int thatColumn[] = new int[matrixSize];
-
+        final int[][] matrixBT = new int[matrixSize][matrixSize];
         for (int i = 0; i < matrixSize; i++) {
-            for (int k = 0; k < matrixSize; k++) {
-                thatColumn[k] = matrixB[k][i];
+            for (int j = 0; j < matrixSize; j++) {
+                matrixBT[i][j] = matrixB[j][i];
             }
-
+        }
+        for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
                 int thatRow[] = matrixA[i];
+                int thatColumn[] = matrixBT[j];
                 int sum = 0;
                 for (int k = 0; k < matrixSize; k++) {
                     sum += thatRow[k] * thatColumn[k];
+                }
+                matrixC[i][j] = sum;
+            }
+        }
+        return matrixC;
+    }
+
+    public static int[][] oldSingleThreadMultiply(int[][] matrixA, int[][] matrixB) {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                int sum = 0;
+                for (int k = 0; k < matrixSize; k++) {
+                    sum += matrixA[i][k] * matrixB[k][j];
                 }
                 matrixC[i][j] = sum;
             }
