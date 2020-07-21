@@ -60,13 +60,13 @@ public class MatrixUtil {
             }
             list.add(new PartMatrixMultiplier(lowBound, upperBound));
         }
-        CompletionService completionService = new ExecutorCompletionService(executor);
-        List<Future> futures = new ArrayList<>();
+        CompletionService<Integer> completionService = new ExecutorCompletionService<>(executor);
+        List<Future<Integer>> futures = new ArrayList<>();
         for (PartMatrixMultiplier p : list) {
             futures.add(completionService.submit(p));
         }
         while (!futures.isEmpty()) {
-            Future future = completionService.poll();
+            Future<Integer> future = completionService.poll();
             futures.remove(future);
         }
         return matrixC;
