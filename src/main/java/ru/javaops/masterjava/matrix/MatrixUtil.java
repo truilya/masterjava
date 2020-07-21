@@ -84,8 +84,8 @@ public class MatrixUtil {
         }
         for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
-                int thatRow[] = matrixA[i];
-                int thatColumn[] = matrixBT[j];
+                int[] thatRow = matrixA[i];
+                int[] thatColumn = matrixBT[j];
                 int sum = 0;
                 for (int k = 0; k < matrixSize; k++) {
                     sum += thatRow[k] * thatColumn[k];
