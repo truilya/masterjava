@@ -2,17 +2,21 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://javaops.ru payload.xsd">
     <Users>
-        <User flag="active" city="kiv">
-            <email>gmail@gmail.com</email>
+        <User login="user1" flag="active" city="kiv" email="gmail@gmail.com">
             <fullName>Full Name</fullName>
+            <groups>topjava02</groups>
         </User>
-        <User flag="superuser" city="spb">
-            <email>admin@javaops.ru</email>
+        <User login="admin" flag="superuser" city="spb" email="admin@javaops.ru">
             <fullName>Admin</fullName>
+            <groups>masterjava1 topjava02</groups>
         </User>
-        <User flag="deleted" city="spb">
-            <email>mail@yandex.ru</email>
+        <User login="user2" flag="deleted" city="spb" email="mail@yandex.ru">
             <fullName>Deleted</fullName>
+            <groups>topjava01</groups>
+        </User>
+        <User login="danila_master" flag="deleted" city="spb" email="mail@yandex.ru">
+            <fullName>Danila Danilov</fullName>
+            <groups>masterjava1</groups>
         </User>
     </Users>
     <Cities>
@@ -20,4 +24,23 @@
         <City id="kiv">Киев</City>
         <City id="mnsk">Минск</City>
     </Cities>
+    <Projects>
+        <Project name="topjava">
+            <Groups>
+                <Group type="REGISTERING" id="topjava01">
+                    <Users>user1</Users>
+                </Group>
+                <Group type="CURRENT" id="topjava02">
+                    <Users>admin user2</Users>
+                </Group>
+            </Groups>
+        </Project>
+        <Project name="masterjava">
+            <Groups>
+                <Group type="CURRENT" id="masterjava1" name="master java">
+                    <Users>admin danila_master</Users>
+                </Group>
+            </Groups>
+        </Project>
+    </Projects>
 </Payload>
