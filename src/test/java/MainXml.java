@@ -94,10 +94,10 @@ public class MainXml {
     private static void printHtmlFromMap(Map<String,String> map){
         StringBuilder builder = new StringBuilder();
         builder.append("<table>")
-               .append("<tr>")
+               .append("<thead><tr>")
                 .append("<td>Full Name</td>")
                 .append("<td>Email</td>")
-                .append("</tr>");
+                .append("</tr></thead>");
         for(Map.Entry e : map.entrySet()){
             builder.append("<tr>")
                     .append("<td>")
