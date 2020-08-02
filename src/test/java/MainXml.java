@@ -23,28 +23,29 @@ public class MainXml {
 
     public static void main(String[] args) throws Exception {
         System.out.println("==== by JAXB ====");
-        Set<String> users = getUsersByProjectJAXB("masterjava");
+        Map<String,String> users = getUsersByProjectJAXB("masterjava");
         System.out.println("for project masterjava");
-        for (String s : users) {
-            System.out.println(s);
+        for (Map.Entry s : users.entrySet()) {
+            System.out.println(s.getKey() + " - " +s.getValue());
         }
         users = getUsersByProjectJAXB("topjava");
         System.out.println("for project topjava");
-        for (String s : users) {
-            System.out.println(s);
+        for (Map.Entry s : users.entrySet()) {
+            System.out.println(s.getKey() + " - " +s.getValue());
         }
         System.out.println("\n==== by Stax ====");
         users = getUsersByProjectSTAX("masterjava");
-        for (String s : users) {
-            System.out.println(s);
+        for (Map.Entry s : users.entrySet()) {
+            System.out.println(s.getKey() + " - " +s.getValue());
         }
+        printHtmlFromMap(users);
     }
 
-    private static Set<String> getUsersByProjectJAXB(String projectName) throws Exception {
+    private static Map<String,String> getUsersByProjectJAXB(String projectName) throws Exception {
         Payload payload = JAXB_PARSER.unmarshal(
                 Resources.getResource("payload.xml").openStream());
         List<Project> projects = payload.getProjects().getProject();
-        Set<String> result = new TreeSet<>();
+        Map<String,String> result = new HashMap<>();
         for (Project p : projects) {
             if (projectName.equalsIgnoreCase(p.getName())) {
                 List<Group> groups = p.getGroups().getGroup();
@@ -52,7 +53,7 @@ public class MainXml {
                     List<Object> users = g.getUsers();
                     for (Object o : users) {
                         User u = (User) o;
-                        result.add(u.getFullName());
+                        result.putIfAbsent(u.getFullName(),u.getEmail());
                     }
                 }
                 return result;
@@ -61,10 +62,9 @@ public class MainXml {
         return result;
     }
 
-    private static Set<String> getUsersByProjectSTAX(final String projectName) throws Exception {
-        Set<String> result = new TreeSet<>();
+    private static Map<String,String> getUsersByProjectSTAX(final String projectName) throws Exception {
         Set<String> projectUsers = new TreeSet<>();
-        Map<String,String> users = new HashMap<>();
+        Map<String,List<String>> users = new HashMap<>();
         try (StaxStreamProcessor processor = new StaxStreamProcessor(Resources.getResource("payload.xml").openStream())) {
             XMLEventReader eventReader = processor.getEventReader();
             while (eventReader.hasNext()) {
@@ -77,15 +77,39 @@ public class MainXml {
                 } else if (event.isStartElement() && USER_ELEMENT.equals(event.asStartElement().getName().getLocalPart())){
                     Attribute attribute =  processor.getAttributeByName(event.asStartElement(),"login");
                     String sLogin = attribute.getValue();
+                    attribute =  processor.getAttributeByName(event.asStartElement(),"email");
+                    String sEmail = attribute.getValue();
                     String fullName = processor.getElementValuesInsideParent(USER_ELEMENT, "fullName").get(0);
-                    users.put(sLogin,fullName);
+                    users.put(sLogin,Arrays.asList(fullName,sEmail));
                 }
             }
         }
+        Map<String, String> result = new HashMap<>();
         for (String s :projectUsers){
-            result.add(users.get(s));
+            result.putIfAbsent(users.get(s).get(0),users.get(s).get(1));
         }
         return result;
+    }
+
+    private static void printHtmlFromMap(Map<String,String> map){
+        StringBuilder builder = new StringBuilder();
+        builder.append("<table>")
+               .append("<tr>")
+                .append("<td>Full Name</td>")
+                .append("<td>Email</td>")
+                .append("</tr>");
+        for(Map.Entry e : map.entrySet()){
+            builder.append("<tr>")
+                    .append("<td>")
+                    .append(e.getKey())
+                    .append("</td>")
+                    .append("<td>")
+                    .append(e.getValue())
+                    .append("</td>")
+                    .append("</tr>");
+        }
+        builder.append("</table>");
+        System.out.println(builder.toString());
     }
 
 }
