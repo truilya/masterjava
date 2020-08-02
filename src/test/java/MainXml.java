@@ -3,10 +3,13 @@ import ru.javaops.masterjava.xml.schema.*;
 import ru.javaops.masterjava.xml.util.JaxbParser;
 import ru.javaops.masterjava.xml.util.Schemas;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
+import ru.javaops.masterjava.xml.util.XsltProcessor;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.XMLEvent;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 public class MainXml {
@@ -39,6 +42,8 @@ public class MainXml {
             System.out.println(s.getKey() + " - " +s.getValue());
         }
         printHtmlFromMap(users);
+        System.out.println("\n==== html by XSLT ====");
+        printHtmlByXslt("masterjava");
     }
 
     private static Map<String,String> getUsersByProjectJAXB(String projectName) throws Exception {
@@ -110,6 +115,16 @@ public class MainXml {
         }
         builder.append("</table>");
         System.out.println(builder.toString());
+    }
+
+    private static void printHtmlByXslt(String projectName) throws Exception {
+        try (InputStream xslInputStream = Resources.getResource("groups.xsl").openStream();
+             InputStream xmlInputStream = Resources.getResource("payload.xml").openStream()) {
+
+            XsltProcessor processor = new XsltProcessor(xslInputStream);
+            processor.getXformer().setParameter("project_name",projectName);
+            System.out.println(processor.transform(xmlInputStream));
+        }
     }
 
 }

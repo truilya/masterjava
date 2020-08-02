@@ -40,6 +40,9 @@
                 <Group type="CURRENT" id="masterjava1" name="master java">
                     <Users>admin danila_master</Users>
                 </Group>
+                <Group type="REGISTERING" id="masterjava2" name="master java 2">
+                    <Users>user1 user2</Users>
+                </Group>
             </Groups>
         </Project>
     </Projects>

@@ -23,6 +23,10 @@ public class XsltProcessor {
         }
     }
 
+    public Transformer getXformer() {
+        return xformer;
+    }
+
     public String transform(InputStream xmlInputStream) throws TransformerException {
         StringWriter out = new StringWriter();
         transform(xmlInputStream, out);
