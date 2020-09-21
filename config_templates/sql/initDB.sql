@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users cascade ;
 DROP SEQUENCE IF EXISTS user_seq;
 DROP TYPE IF EXISTS user_flag;
 
@@ -13,3 +13,4 @@ CREATE TABLE users (
   flag      user_flag NOT NULL
 );
 
+create unique index uidx_users_email on users (email);
