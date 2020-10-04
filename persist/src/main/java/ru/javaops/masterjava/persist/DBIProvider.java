@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.logging.SLF4JLog;
 import org.skife.jdbi.v2.tweak.ConnectionFactory;
-import ru.javaops.masterjava.persist.dao.AbstractDao;
+import ru.javaops.masterjava.persist.dao.CommonDao;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -44,7 +44,7 @@ public class DBIProvider {
         return DBIHolder.jDBI;
     }
 
-    public static <T extends AbstractDao> T getDao(Class<T> daoClass) {
+    public static <T extends CommonDao> T getDao(Class<T> daoClass) {
         return DBIHolder.jDBI.onDemand(daoClass);
     }
 }

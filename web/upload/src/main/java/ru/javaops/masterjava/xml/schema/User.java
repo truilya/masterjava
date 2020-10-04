@@ -39,10 +39,12 @@ public class User {
     protected String email;
     @XmlAttribute(name = "flag", required = true)
     protected FlagType flag;
+    //@XmlAttribute(name = "city", required = true)
+    //@XmlIDREF
+    //@XmlSchemaType(name = "IDREF")
+    //protected Object city;
     @XmlAttribute(name = "city", required = true)
-    @XmlIDREF
-    @XmlSchemaType(name = "IDREF")
-    protected Object city;
+    protected String cityCode;
     @XmlAttribute(name = "groupRefs")
     @XmlIDREF
     @XmlSchemaType(name = "IDREFS")
@@ -128,9 +130,9 @@ public class User {
      *     {@link Object }
      *     
      */
-    public Object getCity() {
+    /*public Object getCity() {
         return city;
-    }
+    }*/
 
     /**
      * Sets the value of the city property.
@@ -140,9 +142,9 @@ public class User {
      *     {@link Object }
      *     
      */
-    public void setCity(Object value) {
+    /*public void setCity(Object value) {
         this.city = value;
-    }
+    }*/
 
     /**
      * Gets the value of the groupRefs property.
@@ -171,6 +173,14 @@ public class User {
             groupRefs = new ArrayList<Object>();
         }
         return this.groupRefs;
+    }
+
+    public String getCityCode() {
+        return cityCode;
+    }
+
+    public void setCityCode(String cityCode) {
+        this.cityCode = cityCode;
     }
 
     @Override

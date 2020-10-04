@@ -90,6 +90,12 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testinfected.hamcrest-matchers</groupId>
+            <artifactId>core-matchers</artifactId>
+            <version>1.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>

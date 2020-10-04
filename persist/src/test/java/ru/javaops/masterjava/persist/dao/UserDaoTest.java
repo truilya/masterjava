@@ -1,17 +1,21 @@
 package ru.javaops.masterjava.persist.dao;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.ExpectedException;
+import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
 import ru.javaops.masterjava.persist.UserTestData;
 import ru.javaops.masterjava.persist.model.User;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static ru.javaops.masterjava.persist.UserTestData.FIST5_USERS;
+import static ru.javaops.masterjava.persist.UserTestData.USER1;
 
 public class UserDaoTest extends AbstractDaoTest<UserDao> {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     public UserDaoTest() {
         super(UserDao.class);
@@ -41,9 +45,12 @@ public class UserDaoTest extends AbstractDaoTest<UserDao> {
     }
 
     @Test
-    public void getSeqAndSkip() throws Exception {
-        int seq1 = dao.getSeqAndSkip(5);
-        int seq2 = dao.getSeqAndSkip(1);
-        Assert.assertEquals(5, seq2 - seq1);
+    public void cityReferenceException(){
+        thrown.expect(UnableToExecuteStatementException.class);
+        thrown.expectMessage(containsString("fk_city"));
+        USER1.setCityId(-1);
+        dao.insert(USER1);
+
     }
+
 }
