@@ -6,9 +6,13 @@ import org.skife.jdbi.v2.sqlobject.*;
 import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 import ru.javaops.masterjava.persist.DBIProvider;
+import ru.javaops.masterjava.persist.model.Group;
 import ru.javaops.masterjava.persist.model.User;
+import ru.javaops.masterjava.persist.model.UserGroup;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RegisterMapperFactory(EntityMapperFactory.class)
 public abstract class UserDao implements AbstractDao {
@@ -49,14 +53,32 @@ public abstract class UserDao implements AbstractDao {
     public abstract void clean();
 
     //    https://habrahabr.ru/post/264281/
-    @SqlBatch("INSERT INTO users (id, full_name, email, flag, city_ref) VALUES (:id, :fullName, :email, CAST(:flag AS USER_FLAG), :cityRef)" +
+    @SqlBatch("INSERT INTO users (full_name, email, flag, city_ref) VALUES (:fullName, :email, CAST(:flag AS USER_FLAG), :cityRef)" +
             "ON CONFLICT DO NOTHING")
 //            "ON CONFLICT (email) DO UPDATE SET full_name=:fullName, flag=CAST(:flag AS USER_FLAG)")
     public abstract int[] insertBatch(@BindBean List<User> users, @BatchChunkSize int chunkSize);
 
+    @SqlBatch("insert into tmp_user_group(email, group_id) values(:email, :group_id) on conflict do nothing")
+    public abstract void insertBatchUserGroup(@Bind("email") List<String> emails, @Bind("group_id") List<Integer> groupIds, @BatchChunkSize int chunkSize);
 
-    public List<String> insertAndGetConflictEmails(List<User> users) {
+    @SqlCall("call prc_fill_user_groups()")
+    public abstract void callFillUserGroups();
+
+    public List<String> insertAndGetConflictEmails(List<User> users, Map<String,List<Group>> userGroups) {
         int[] result = insertBatch(users, users.size());
+        for (int i = 0; i < users.size(); i++) {
+            if (result[i] > 0) {
+                List<Integer> groupIds = new ArrayList<>();
+                List<String> emails = new ArrayList<>();
+                String email = users.get(i).getEmail();
+                for(Group g : userGroups.get(email)){
+                    emails.add(email);
+                    groupIds.add(g.getId());
+                }
+                insertBatchUserGroup(emails, groupIds, emails.size());
+                callFillUserGroups();
+            }
+        }
         return IntStreamEx.range(0, users.size())
                 .filter(i -> result[i] == 0)
                 .mapToObj(index -> users.get(index).getEmail())
